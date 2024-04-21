@@ -27,6 +27,14 @@ func InitSecrets() {
 
 	var dbPort string = os.Getenv("MYSQL_PORT")
 
+	if dbHost == "" {
+		dbHost = "127.0.0.1"
+	}
+
+	if dbPort == "" {
+		dbPort = "3306"
+	}
+
 	connectionString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPwd, dbHost, dbPort, dbName)
 
 }

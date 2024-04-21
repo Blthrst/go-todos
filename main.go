@@ -13,5 +13,5 @@ func main() {
 
 	http.HandleFunc("/users", handlers.UsersHandler)
 
-    http.ListenAndServe("localhost:8090", nil)
+    http.ListenAndServe("localhost:4545", nil)
 }
