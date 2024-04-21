@@ -3,13 +3,15 @@ package main
 import (
 	//"fmt"
 	"net/http"
+	"github.com/Blthrst/go-todos/handlers"
+	"github.com/Blthrst/go-todos/model"
 )
 
 func main() {
 
-	InitSecrets()
+	model.InitSecrets()
 
-	http.HandleFunc("/users/", GetUser)
+	http.HandleFunc("/users", handlers.UsersHandler)
 
     http.ListenAndServe("localhost:8090", nil)
 }
