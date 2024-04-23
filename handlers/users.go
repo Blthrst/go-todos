@@ -2,65 +2,88 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/Blthrst/go-todos/model"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
-	"github.com/Blthrst/go-todos/model"
 )
 
-func UsersHandler(w http.ResponseWriter, req *http.Request) {
+func GetAllUsers(w http.ResponseWriter, req *http.Request) {
+	users, err := model.GetAllUsers()
 
-	switch req.Method {
-	case "GET":
-		{
-			userId, err := url.ParseQuery(req.URL.RawQuery)
-
-			if err != nil {
-				panic(err.Error())
-			}
-
-			id, err := strconv.Atoi(userId["userId"][0])
-
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-
-			u, err := model.GetUser(id)
-
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-
-			data, err := json.Marshal(u)
-
-			w.Write(data)
-
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-		}
-
-	case "POST":
-		{
-
-			u := model.User{}
-
-			err := json.NewDecoder(req.Body).Decode(&u)
-
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-
-			_, err = model.InsertUser(u)
-
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-
-			w.WriteHeader(http.StatusCreated)
-		}
-
-	default: w.WriteHeader(http.StatusNotFound)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		return
 	}
+
+	data, _ := json.Marshal(users)
+
+	w.Write(data)
+}
+
+func GetOneUser(w http.ResponseWriter, req *http.Request) {
+
+	userId, err := url.ParseQuery(req.URL.RawQuery)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(userId["userId"][0])
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	u, err := model.GetUser(id)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	data, _ := json.Marshal(u)
+
+	w.Write(data)
+
+}
+
+func CreateUsers(w http.ResponseWriter, req *http.Request) {
+	users := []model.User{}
+
+	err := json.NewDecoder(req.Body).Decode(&users)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	_, err = model.InsertUsers(users)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	response, err := json.Marshal(MessageFromServer{
+		Message: "Succesfully created",
+		Status:  http.StatusCreated,
+	})
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println(err.Error())
+		return
+	}
+
+	w.Write(response)
 }

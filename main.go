@@ -11,7 +11,9 @@ func main() {
 
 	model.InitSecrets()
 
-	http.HandleFunc("/users", handlers.UsersHandler)
+	http.HandleFunc("/users/", handlers.GetAllUsers)
+	http.HandleFunc("/users/new", handlers.CreateUsers)
+	http.HandleFunc("/users/one", handlers.GetOneUser)
 
     http.ListenAndServe("localhost:4545", nil)
 }

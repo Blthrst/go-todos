@@ -39,14 +39,14 @@ func InitSecrets() {
 
 }
 
-func GetUser(id int) (*User, error) {
+func GetUser(id int) (User, error) {
 
 	user := &User{}
 
 	db, err := sql.Open("mysql", connectionString)
 
 	if err != nil {
-		return user, err
+		return *user, err
 	}
 
 	defer db.Close()
@@ -54,29 +54,60 @@ func GetUser(id int) (*User, error) {
 	rows, err := db.Query("select * from users where id = ?", id)
 
 	if err != nil {
-		return user, err
+		return *user, err
 	}
 
 	rows.Next()
 	rows.Scan(&user.Id, &user.Name)
 
-	return user, nil
+	return *user, nil
 }
 
-func InsertUser(user User) (sql.Result, error) {
+func GetAllUsers() ([]User, error) {
+
+	users := []User{}
+
 	db, err := sql.Open("mysql", connectionString)
 
 	if err != nil {
-		return nil, err
+		return users, err
 	}
 
 	defer db.Close()
 
-	result, err := db.Exec("insert into users (id, name) values (?, ?);", user.Id, user.Name)
+	rows, err := db.Query("select * from users")
 
 	if err != nil {
-		return nil, err
+		return users, err
 	}
 
-	return result, nil
+	for rows.Next() {
+		user := &User{}
+
+		rows.Scan(&user.Id, &user.Name)
+
+		users = append(users[0:], *user)
+	}
+
+	return users, nil
+}
+
+func InsertUsers(users []User) (bool, error) {
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return false, err
+	}
+
+	defer db.Close()
+
+	for i:=0; i < len(users); i++ {
+		_, err := db.Exec("insert into users (id, name) values (?, ?);", users[i].Id, users[i].Name)
+
+	if err != nil {
+		return false, err
+	}
+	}
+
+	return true, nil
 }
