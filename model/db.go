@@ -92,11 +92,11 @@ func GetAllUsers() ([]User, error) {
 	return users, nil
 }
 
-func InsertUsers(users []User) (bool, error) {
+func InsertUsers(users []User) (error) {
 	db, err := sql.Open("mysql", connectionString)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	defer db.Close()
@@ -105,9 +105,87 @@ func InsertUsers(users []User) (bool, error) {
 		_, err := db.Exec("insert into users (id, name) values (?, ?);", users[i].Id, users[i].Name)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 	}
 
-	return true, nil
+	return nil
+}
+
+func DeleteUsers(ids []int) error {
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	for i:=0; i < len(ids); i++ {
+		_, err := db.Exec("delete from users where id = ?", ids[i])
+
+		if err != nil {
+			return err
+		}
+	}
+	
+	return nil
+}
+
+func UpdateUser(ub UpdateUserBody) error {
+	
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec("update users set id = ?, name = ? where id = ?", ub.User.Id, ub.User.Name, ub.Id)
+
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func CreateTodo(todo Todo) error {
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec("insert into todos (id, title, decription, is_done, user_id) values ({Id}, {Title}, {Description}, {IsDone}, {UserId})", todo)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteTodos(ids []int) error {
+
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	for i := 0; i < len(ids); i++ {
+		_, err = db.Exec("delete from todos where id = ?", ids[i])
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

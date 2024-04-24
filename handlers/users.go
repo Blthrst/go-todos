@@ -66,7 +66,7 @@ func CreateUsers(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, err = model.InsertUsers(users)
+	err = model.InsertUsers(users)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -74,10 +74,7 @@ func CreateUsers(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	response, err := json.Marshal(MessageFromServer{
-		Message: "Succesfully created",
-		Status:  http.StatusCreated,
-	})
+	response, err := json.Marshal(ServerCreatedMessage)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -86,4 +83,60 @@ func CreateUsers(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Write(response)
+}
+
+func DeleteUsers(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		usersIds := []int{}
+
+		err := json.NewDecoder(req.Body).Decode(&usersIds)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			log.Println(err.Error())
+			return
+		}
+
+		err = model.DeleteUsers(usersIds)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			log.Println(err.Error())
+			return
+		}
+
+		data, _ := json.Marshal(ServerDeletedMessage)
+
+		w.Write(data)
+
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
+func UpdateUser(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		ub := model.UpdateUserBody{}
+
+		err := json.NewDecoder(req.Body).Decode(&ub)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			log.Println(err.Error())
+			return
+		}
+
+		err = model.UpdateUser(ub)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			log.Println(err.Error())
+			return
+		}
+
+		data, _ := json.Marshal(ServerUpdatedMessage)
+
+		w.Write(data)
+
+	}
 }

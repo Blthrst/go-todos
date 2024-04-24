@@ -12,3 +12,13 @@ type User struct {
 	Id   int   `json:"id"`
 	Name string `json:"name"`
 }
+
+type MessageFromServer struct {
+	Message string `json:"message"`
+	Status  int    `json:"status"`
+}
+
+type UpdateUserBody struct {
+	Id   int        `json:"id"`
+	User User `json:"user"`
+}
