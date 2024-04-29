@@ -9,6 +9,8 @@ import (
 
 func main() {
 
+	//create db and tables automatically
+
 	model.InitSecrets()
 
 	http.HandleFunc("/users/", handlers.GetAllUsers)

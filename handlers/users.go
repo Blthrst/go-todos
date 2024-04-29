@@ -58,13 +58,7 @@ func GetOneUser(w http.ResponseWriter, req *http.Request) {
 func CreateUsers(w http.ResponseWriter, req *http.Request) {
 	users := []model.User{}
 
-	err := json.NewDecoder(req.Body).Decode(&users)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Println(err.Error())
-		return
-	}
+	users = decodeJSON(w, req, users)
 
 	err = model.InsertUsers(users)
 

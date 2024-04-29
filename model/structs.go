@@ -1,15 +1,15 @@
 package model
 
 type Todo struct {
-	Id          int   `json:"id"`
+	Id          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	IsDone      bool   `json:"isDone"`
-	UserId      int   `json:"userId"`
+	UserId      int    `json:"userId"`
 }
 
 type User struct {
-	Id   int   `json:"id"`
+	Id   int    `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -19,6 +19,10 @@ type MessageFromServer struct {
 }
 
 type UpdateUserBody struct {
-	Id   int        `json:"id"`
+	Id   int  `json:"id"`
 	User User `json:"user"`
+}
+
+type CompleteTodoBody struct {
+	Id int `json:"id"`
 }

@@ -39,6 +39,8 @@ func InitSecrets() {
 
 }
 
+//users
+
 func GetUser(id int) (User, error) {
 
 	user := &User{}
@@ -151,6 +153,41 @@ func UpdateUser(ub UpdateUserBody) error {
 	return nil
 }
 
+//todos
+
+func GetTodos() ([]Todo, error) {
+
+	todos := []Todo{}
+
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+
+	rows, err := db.Query("select * from todos")
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		todo := &Todo{}
+
+		err := rows.Scan(&todo.Id, &todo.Title, &todo.Description, &todo.IsDone, &todo.UserId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		todos = append(todos[0:], *todo)
+	}
+
+	return todos, nil
+}
+
 func CreateTodo(todo Todo) error {
 	db, err := sql.Open("mysql", connectionString)
 
@@ -185,6 +222,42 @@ func DeleteTodos(ids []int) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func CompleteTodo(id int) error {
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec("update todos set is_done = true where id = ?", id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateTodo(todo Todo) error {
+	db, err := sql.Open("mysql", connectionString)
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec("update todos set title = ?, description = ?, is_done = ?, user_id = ? where id = ?", todo.Title, todo.Description, todo.IsDone, todo.UserId, todo.Id)
+
+	if err != nil {
+		return err
 	}
 
 	return nil
