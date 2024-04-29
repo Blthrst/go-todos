@@ -6,7 +6,7 @@ API for managing todos and users.
 
 1. Clone this repository by:
 
-```git clone https://github.com/Blthrst/go-todos```
+        git clone https://github.com/Blthrst/go-todos
 
 2. Setup your `.env` file with at least 3 environment variables:
 
@@ -18,11 +18,11 @@ API for managing todos and users.
 
    To create database just open your MySQL Workbench or connect to mysql-server by `mysql -u <username> -p` and type:
 
-   ```create database if not exists <your_db_name>;```.
+        create database if not exists <your_db_name>;
 
    Then check your databases list:
 
-   ```show databases;```
+        show databases;
 
 After these steps, you can run program by `go run .` or compile it and run executable file.
 
