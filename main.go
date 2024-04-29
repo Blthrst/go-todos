@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"fmt"
 	"net/http"
 	"github.com/Blthrst/go-todos/handlers"
 	"github.com/Blthrst/go-todos/model"
@@ -9,15 +8,19 @@ import (
 
 func main() {
 
-	//create db and tables automatically
-
 	model.InitSecrets()
+	model.PrepareDatabase()
 
 	http.HandleFunc("/users/", handlers.GetAllUsers)
-	http.HandleFunc("/users/new", handlers.CreateUsers)
+	http.HandleFunc("/users/create", handlers.CreateUsers)
 	http.HandleFunc("/users/delete", handlers.DeleteUsers)
 	http.HandleFunc("/users/update", handlers.UpdateUser)
-	http.HandleFunc("/users/one", handlers.GetOneUser)
+	http.HandleFunc("/users/get", handlers.GetOneUser)
+
+	http.HandleFunc("/todos/", handlers.GetTodos)
+	http.HandleFunc("/todos/create", handlers.CreateTodo)
+	http.HandleFunc("/todos/delete", handlers.DeleteTodos)
+	http.HandleFunc("/todos/update", handlers.UpdateTodo)
 
     http.ListenAndServe("localhost:4545", nil)
 }

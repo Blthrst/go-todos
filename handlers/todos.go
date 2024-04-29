@@ -5,15 +5,13 @@ import (
 	"github.com/Blthrst/go-todos/model"
 	"log"
 	"net/http"
-	//"net/url"
-	//"strconv"
 )
 
 func CreateTodo(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		todo := model.Todo{}
 
-		decodeJSON(w, req, &todo)
+		todo = decodeJSON(w, req, todo)
 
 		err := model.CreateTodo(todo)
 
@@ -23,9 +21,7 @@ func CreateTodo(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		data, _ := json.Marshal(ServerCreatedMessage)
-
-		w.Write(data)
+		sendServerMessage(w, ServerCreatedMessage)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -33,17 +29,11 @@ func CreateTodo(w http.ResponseWriter, req *http.Request) {
 
 func DeleteTodos(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
-		todosIds := []int{}
+		delBody := model.DeleteTodosBody{}
 
-		err := json.NewDecoder(req.Body).Decode(&todosIds)
+		delBody = decodeJSON(w, req, delBody)
 
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			log.Println(err.Error())
-			return
-		}
-
-		err = model.DeleteTodos(todosIds)
+		err := model.DeleteTodos(delBody.TodoIds)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -51,9 +41,7 @@ func DeleteTodos(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		data, _ := json.Marshal(ServerCreatedMessage)
-
-		w.Write(data)
+		sendServerMessage(w, ServerDeletedMessage)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -63,7 +51,9 @@ func CompleteTodo(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		completeBody := model.CompleteTodoBody{}
 
-		err := json.NewDecoder(req.Body).Decode(&completeBody)
+		completeBody = decodeJSON(w, req, completeBody)
+
+		err := model.CompleteTodo(completeBody.Id)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -71,17 +61,7 @@ func CompleteTodo(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = model.CompleteTodo(completeBody.Id)
-
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			log.Println(err.Error())
-			return
-		}
-
-		data, _ := json.Marshal(ServerCreatedMessage)
-
-		w.Write(data)
+		sendServerMessage(w, ServerUpdatedMessage)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -89,14 +69,35 @@ func CompleteTodo(w http.ResponseWriter, req *http.Request) {
 
 func GetTodos(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "GET" {
-		todos := []model.Todo{}
+		todos, err := model.GetTodos()
 
-		err := json.NewDecoder(req.Body).Decode(&todos)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			log.Println(err.Error())
-			return
+			writeErrorAndLog(w, err)
 		}
+
+		data, _ := json.Marshal(todos)
+
+		w.Write(data)
+
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
+func UpdateTodo(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		todo := model.Todo{}
+
+		todo = decodeJSON(w, req, todo)
+
+		err := model.UpdateTodo(todo)
+
+		if err != nil {
+			writeErrorAndLog(w, err)
+		}
+
+		sendServerMessage(w, ServerUpdatedMessage)
+
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 	}

@@ -26,3 +26,7 @@ type UpdateUserBody struct {
 type CompleteTodoBody struct {
 	Id int `json:"id"`
 }
+
+type DeleteTodosBody struct {
+	TodoIds []int `json:"todosIds"`
+}

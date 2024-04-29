@@ -1,16 +1,10 @@
 (async () => {
-    const result = await fetch("http://localhost:4545/users/update", {
+    const result = await fetch("http://localhost:4545/users/create", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            id: 23,
-            user: {
-                id: 4,
-                name: "Updated"
-            }
-        })
+        body: JSON.stringify([{id: 1, name: "Snowik"}])
     })
 
     console.log(await result.json())

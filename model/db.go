@@ -3,18 +3,22 @@ package model
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
 
 var connectionString string
 
+// setup funcs
+
 func InitSecrets() {
 	err := godotenv.Load()
 
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	var dbUser string = os.Getenv("MYSQL_USER")
@@ -39,226 +43,35 @@ func InitSecrets() {
 
 }
 
-//users
-
-func GetUser(id int) (User, error) {
-
-	user := &User{}
-
+func PrepareDatabase() {
 	db, err := sql.Open("mysql", connectionString)
 
 	if err != nil {
-		return *user, err
+		log.Fatal(err.Error())
 	}
 
 	defer db.Close()
 
-	rows, err := db.Query("select * from users where id = ?", id)
+	_, err = db.Exec(`CREATE TABLE if not exists users (
+		id int NOT NULL,
+		name varchar(255) NOT NULL,
+		PRIMARY KEY (id)
+	  );`)
 
 	if err != nil {
-		return *user, err
+		log.Fatal(err.Error())
 	}
 
-	rows.Next()
-	rows.Scan(&user.Id, &user.Name)
-
-	return *user, nil
-}
-
-func GetAllUsers() ([]User, error) {
-
-	users := []User{}
-
-	db, err := sql.Open("mysql", connectionString)
+	_, err = db.Exec(`CREATE TABLE if not exists todos (
+		id int NOT NULL,
+		title varchar(255) NOT NULL,
+		description longtext NOT NULL,
+		is_done tinyint(1) NOT NULL,
+		user_id int NOT NULL,
+		PRIMARY KEY (id)
+	  );`)
 
 	if err != nil {
-		return users, err
+		log.Fatal(err.Error())
 	}
-
-	defer db.Close()
-
-	rows, err := db.Query("select * from users")
-
-	if err != nil {
-		return users, err
-	}
-
-	for rows.Next() {
-		user := &User{}
-
-		rows.Scan(&user.Id, &user.Name)
-
-		users = append(users[0:], *user)
-	}
-
-	return users, nil
-}
-
-func InsertUsers(users []User) (error) {
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return err
-	}
-
-	defer db.Close()
-
-	for i:=0; i < len(users); i++ {
-		_, err := db.Exec("insert into users (id, name) values (?, ?);", users[i].Id, users[i].Name)
-
-	if err != nil {
-		return err
-	}
-	}
-
-	return nil
-}
-
-func DeleteUsers(ids []int) error {
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return err
-	}
-
-	defer db.Close()
-
-	for i:=0; i < len(ids); i++ {
-		_, err := db.Exec("delete from users where id = ?", ids[i])
-
-		if err != nil {
-			return err
-		}
-	}
-	
-	return nil
-}
-
-func UpdateUser(ub UpdateUserBody) error {
-	
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return err
-	}
-
-	defer db.Close()
-
-	_, err = db.Exec("update users set id = ?, name = ? where id = ?", ub.User.Id, ub.User.Name, ub.Id)
-
-	if err != nil {
-		return err
-	}
-	
-	return nil
-}
-
-//todos
-
-func GetTodos() ([]Todo, error) {
-
-	todos := []Todo{}
-
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer db.Close()
-
-	rows, err := db.Query("select * from todos")
-
-	if err != nil {
-		return nil, err
-	}
-
-	for rows.Next() {
-		todo := &Todo{}
-
-		err := rows.Scan(&todo.Id, &todo.Title, &todo.Description, &todo.IsDone, &todo.UserId)
-
-		if err != nil {
-			return nil, err
-		}
-
-		todos = append(todos[0:], *todo)
-	}
-
-	return todos, nil
-}
-
-func CreateTodo(todo Todo) error {
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return err
-	}
-
-	defer db.Close()
-
-	_, err = db.Exec("insert into todos (id, title, decription, is_done, user_id) values ({Id}, {Title}, {Description}, {IsDone}, {UserId})", todo)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func DeleteTodos(ids []int) error {
-
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return err
-	}
-
-	defer db.Close()
-
-	for i := 0; i < len(ids); i++ {
-		_, err = db.Exec("delete from todos where id = ?", ids[i])
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func CompleteTodo(id int) error {
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return err
-	}
-
-	defer db.Close()
-
-	_, err = db.Exec("update todos set is_done = true where id = ?", id)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UpdateTodo(todo Todo) error {
-	db, err := sql.Open("mysql", connectionString)
-
-	if err != nil {
-		return err
-	}
-
-	defer db.Close()
-
-	_, err = db.Exec("update todos set title = ?, description = ?, is_done = ?, user_id = ? where id = ?", todo.Title, todo.Description, todo.IsDone, todo.UserId, todo.Id)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

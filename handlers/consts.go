@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/Blthrst/go-todos/model"
-	"net/http"
 	"encoding/json"
+	"github.com/Blthrst/go-todos/model"
 	"log"
+	"net/http"
 )
 
 var ServerCreatedMessage = model.MessageFromServer{
@@ -22,14 +22,23 @@ var ServerDeletedMessage = model.MessageFromServer{
 	Status:  http.StatusOK,
 }
 
-func decodeJSON[W http.ResponseWriter, R *http.Request, T any](w W, req R, target T) T {
+func sendServerMessage(w http.ResponseWriter, msg model.MessageFromServer) {
+	data, _ := json.Marshal(msg)
+
+	w.Write(data)
+}
+
+func decodeJSON[T any](w http.ResponseWriter, req *http.Request, target T) T {
 	err := json.NewDecoder(req.Body).Decode(&target)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Println(err.Error())
-		return 
+		writeErrorAndLog(w, err)
 	}
 
 	return target
+}
+
+func writeErrorAndLog(w http.ResponseWriter, err error) {
+	w.WriteHeader(http.StatusBadRequest)
+	log.Println(err.Error())
 }
